@@ -9,15 +9,15 @@ function create_training_data()
 IMAGES_PATH = '../UCMerced_LandUse/Images/';
 
 CATEGORIES = {
-  % 'agricultural';
-  'airplane';
+  'agricultural';
+  % 'airplane';
   % 'baseballdiamond';
   % 'beach';
-  'buildings';
+  % 'buildings';
   % 'chaparral';
-  % 'denseresidential';
+  'denseresidential';
   % 'forest';
-  'freeway';
+  % 'freeway';
   % 'golfcourse';
   % 'harbor';
   % 'intersection';
@@ -25,11 +25,11 @@ CATEGORIES = {
   % 'mobilehomepark';
   % 'overpass';
   % 'parkinglot';
-  % 'river';
+  'river';
   % 'runway';
   % 'sparseresidential';
-  'storagetanks';
-  % 'tenniscourt'
+  % 'storagetanks';
+  'tenniscourt'
 };
 
 IMAGES_PER_CATEGORY = 100;
@@ -176,7 +176,7 @@ fprintf('\n');
 % saveMatrix(CROSS_VALIDATION_SET_Y_FILE, y_cv);
 % saveMatrix(TEST_SET_Y_FILE, y_t);
 
-save('UCMerced_LandUse.mat', 'y', 'y_cv', 'y_t', 'X', 'X_cv', 'X_t');
+save('../datasets/UCMerced_LandUse.mat', 'y', 'y_cv', 'y_t', 'X', 'X_cv', 'X_t');
 
 fprintf('\nDone.\n');
 
