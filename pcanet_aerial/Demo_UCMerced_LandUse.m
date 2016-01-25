@@ -39,10 +39,10 @@ clear y_t;
 
 % ==== Subsampling the Training and Testing sets ============
 % (comment out the following four lines for a complete test)
-% TrnData = TrnData(1:40:end,:);  % sample around 2500 training samples
-% TrnLabels = TrnLabels(1:40:end); %
-% TestData = TestData(1:40:end,:);  % sample around 1000 test samples
-% TestLabels = TestLabels(1:40:end);
+% TrnData = TrnData(1:10:end,:);  % sample around 2500 training samples
+% TrnLabels = TrnLabels(1:10:end); %
+% TestData = TestData(1:10:end,:);  % sample around 1000 test samples
+% TestLabels = TestLabels(1:10:end);
 % ===========================================================
 
 nTestImg = length(TestLabels);
@@ -50,9 +50,9 @@ nTestImg = length(TestLabels);
 %% PCANet parameters (they should be funed based on validation set; i.e., ValData & ValLabel)
 % We use the parameters in our IEEE TPAMI submission
 PCANet.NumStages = 2;
-PCANet.PatchSize = [16 16];
+PCANet.PatchSize = [8 8];
 PCANet.NumFilters = [4 8];
-PCANet.HistBlockSize = [16 16];
+PCANet.HistBlockSize = [128 128];
 PCANet.BlkOverLapRatio = 0.0;
 PCANet.Pyramid = [];
 
