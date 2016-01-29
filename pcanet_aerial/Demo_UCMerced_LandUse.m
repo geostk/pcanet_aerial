@@ -65,12 +65,35 @@ fprintf('\n ====== PCANet Training ======= \n')
 TrnData_ImgCell = mat2imgcell(TrnData,ImgSize,ImgSize,ImgFormat); % convert columns in TrnData to cells
 clear TrnData;
 
+figure
+
+for p = 1:9
+  idj = randi(length(TrnLabels));
+  display(TrnLabels(idj));
+  subplot(3, 3, p), subimage(TrnData_ImgCell{idj});
+end
+
+pause
 
 fprintf('Number of training samples: %d \n', length(TrnData_ImgCell))
 tic;
 [ftrain V BlkIdx] = PCANet_train(TrnData_ImgCell,PCANet,1); % BlkIdx serves the purpose of learning block-wise DR projection matrix; e.g., WPCA
 PCANet_TrnTime = toc;
 clear TrnData_ImgCell;
+
+V
+
+figure
+for p = 1:8
+    subplot(4, 2, p), subimage(reshape((V{1}(:, p) + 1) / 2, 7, 7, 3))
+end
+
+figure
+for p = 1:8
+    subplot(4, 2, p), subimage(reshape((V{2}(:, p) + 1) / 2, 7, 7))
+end
+pause
+
 
 fprintf('\n ====== Training Linear SVM Classifier ======= \n')
 tic;
