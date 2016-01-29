@@ -39,10 +39,11 @@ clear y_t;
 
 % ==== Subsampling the Training and Testing sets ============
 % (comment out the following four lines for a complete test)
-% TrnData = TrnData(1:10:end,:);  % sample around 2500 training samples
-% TrnLabels = TrnLabels(1:10:end); %
-% TestData = TestData(1:10:end,:);  % sample around 1000 test samples
-% TestLabels = TestLabels(1:10:end);
+every_nth_example = 40;
+TrnData = TrnData(1:every_nth_example:end,:);  % sample around 2500 training samples
+TrnLabels = TrnLabels(1:every_nth_example:end); %
+TestData = TestData(1:every_nth_example:end,:);  % sample around 1000 test samples
+TestLabels = TestLabels(1:every_nth_example:end);
 % ===========================================================
 
 nTestImg = length(TestLabels);
@@ -50,10 +51,10 @@ nTestImg = length(TestLabels);
 %% PCANet parameters (they should be funed based on validation set; i.e., ValData & ValLabel)
 % We use the parameters in our IEEE TPAMI submission
 PCANet.NumStages = 2;
-PCANet.PatchSize = [8 8];
-PCANet.NumFilters = [4 8];
-PCANet.HistBlockSize = [128 128];
-PCANet.BlkOverLapRatio = 0.0;
+PCANet.PatchSize = [7 7];
+PCANet.NumFilters = [8 8];
+PCANet.HistBlockSize = [32 32];
+PCANet.BlkOverLapRatio = 0.25;
 PCANet.Pyramid = [];
 
 fprintf('\n ====== PCANet Parameters ======= \n')
@@ -64,10 +65,7 @@ fprintf('\n ====== PCANet Training ======= \n')
 TrnData_ImgCell = mat2imgcell(TrnData,ImgSize,ImgSize,ImgFormat); % convert columns in TrnData to cells
 clear TrnData;
 
-% idj = randi(length(TrnLabels));
-% display(TrnLabels(idj));
-% imshow(TrnData_ImgCell{idj});
-% pause
+
 fprintf('Number of training samples: %d \n', length(TrnData_ImgCell))
 tic;
 [ftrain V BlkIdx] = PCANet_train(TrnData_ImgCell,PCANet,1); % BlkIdx serves the purpose of learning block-wise DR projection matrix; e.g., WPCA
@@ -76,9 +74,13 @@ clear TrnData_ImgCell;
 
 fprintf('\n ====== Training Linear SVM Classifier ======= \n')
 tic;
-models = train(double(TrnLabels), ftrain', '-s 1 -q'); % we use linear SVM classifier (C = 1), calling libsvm library
+models = train(TrnLabels, ftrain', '-s 1 -q'); % we use linear SVM classifier (C = 1), calling libsvm library
 LinearSVM_TrnTime = toc;
+[predict_labels] = predict(TrnLabels, ftrain', models, '-q');
 clear ftrain;
+
+trn_accuracy = sum(predict_labels == TrnLabels) / length(TrnLabels);
+fprintf('Accuracy for trainging set is %g.\n', trn_accuracy);
 
 
 %% PCANet Feature Extraction and Testing
@@ -96,7 +98,7 @@ for idx = 1:1:nTestImg
 
     ftest = PCANet_FeaExt(TestData_ImgCell(idx),V,PCANet); % extract a test feature using trained PCANet model
 
-    [xLabel_est, accuracy, decision_values] = predict(double(TestLabels(idx)),...
+    [xLabel_est, accuracy, decision_values] = predict(TestLabels(idx),...
         sparse(ftest'), models, '-q'); % label predictoin by libsvm
 
     if xLabel_est == TestLabels(idx)

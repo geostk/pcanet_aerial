@@ -14,13 +14,14 @@ function [OutImg OutImgIdx] = PCA_output(InImg, InImgIdx, PatchSize, NumFilters,
 addpath('./Utils')
 
 ImgZ = length(InImg);
-mag = (PatchSize)/2;
+mod_pmt = mod(PatchSize, 2);
+mag = (PatchSize - mod_pmt)/2;
 OutImg = cell(NumFilters*ImgZ,1);
 cnt = 0;
 for i = 1:ImgZ
     [ImgX, ImgY, NumChls] = size(InImg{i});
     img = zeros(ImgX+PatchSize-1,ImgY+PatchSize-1, NumChls);
-    img((mag):end-mag,(mag):end-mag,:) = InImg{i};
+    img((mag + mod_pmt):end-mag,(mag + mod_pmt):end-mag,:) = InImg{i};
     im = im2col_mean_removal(img,[PatchSize PatchSize]); % collect all the patches of the ith image in a matrix, and perform patch mean removal
     for j = 1:NumFilters
         cnt = cnt + 1;

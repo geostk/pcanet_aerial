@@ -10,25 +10,25 @@ IMAGES_PATH = '../UCMerced_LandUse/Images/';
 
 CATEGORIES = {
   'agricultural';
-  % 'airplane';
-  % 'baseballdiamond';
-  % 'beach';
-  % 'buildings';
-  % 'chaparral';
+  'airplane';
+  'baseballdiamond';
+  'beach';
+  'buildings';
+  'chaparral';
   'denseresidential';
-  % 'forest';
-  % 'freeway';
-  % 'golfcourse';
-  % 'harbor';
-  % 'intersection';
-  % 'mediumresidential';
-  % 'mobilehomepark';
-  % 'overpass';
-  % 'parkinglot';
+  'forest';
+  'freeway';
+  'golfcourse';
+  'harbor';
+  'intersection';
+  'mediumresidential';
+  'mobilehomepark';
+  'overpass';
+  'parkinglot';
   'river';
-  % 'runway';
-  % 'sparseresidential';
-  % 'storagetanks';
+  'runway';
+  'sparseresidential';
+  'storagetanks';
   'tenniscourt'
 };
 
@@ -60,7 +60,7 @@ function [name] = create_path_name(category, number)
 end
 
 function [out] = precision_conv(in)
-  out = single(in);
+  out = in;
 end
 
 function [out] = loadFilesInCategory_impl(category_name, numbers)
@@ -83,7 +83,7 @@ function [out] = loadFilesInCategory_impl(category_name, numbers)
     %image_uint8 = im2uint8(image_grayscale);
     full_image = imresize(full_image, 0.5);
     % image_uint8 = im2uint8(full_image);
-    full_image = im2single(full_image);
+    % full_image = im2single(full_image);
 
     %fprintf('%s [%d %d] <= [%d %d]\n', create_path_name(category_name, numbers(i)), size(out(i, :), 1),  size(out(i, :), 2), size(image_uint8(:)', 1), size(image_uint8(:)', 2));
     %out(i, :) = image_uint8(:)';kjjjjlkmklm
