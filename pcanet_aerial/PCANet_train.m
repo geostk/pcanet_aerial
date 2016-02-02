@@ -1,4 +1,4 @@
-function [f V BlkIdx] = PCANet_train(InImg,PCANet,IdtExt)
+function [f V BlkIdx] = PCANet_train(InImg,PCANet,IdtExt, ImgFormat)
 % =======INPUT=============
 % InImg     Input images (cell); each cell can be either a matrix (Gray) or a 3D tensor (RGB)
 % PCANet    PCANet parameters (struct)
@@ -36,8 +36,13 @@ end
 NumImg = length(InImg);
 
 V = cell(PCANet.NumStages,1);
-OutImg = InImg;
 ImgIdx = (1:NumImg)';
+OutImg = InImg;
+
+if exist('ImgFormat') & strcmp(ImgFormat,'color')
+  [OutImg ImgIdx] = separate_image_layers(InImg, ImgIdx);
+end
+
 clear InImg;
 
 for stage = 1:PCANet.NumStages

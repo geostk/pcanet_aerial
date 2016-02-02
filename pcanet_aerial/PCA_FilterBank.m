@@ -1,6 +1,6 @@
-function V = PCA_FilterBank(InImg, PatchSize, NumFilters) 
+function V = PCA_FilterBank(InImg, PatchSize, NumFilters)
 % =======INPUT=============
-% InImg            Input images (cell structure)  
+% InImg            Input images (cell structure)
 % PatchSize        the patch size, asumed to an odd number.
 % NumFilters       the number of PCA filters in the bank.
 % =======OUTPUT============
@@ -13,7 +13,7 @@ addpath('./Utils')
 % training set to learn PCA filter banks
 ImgZ = length(InImg);
 MaxSamples = 100000;
-NumRSamples = min(ImgZ, MaxSamples); 
+NumRSamples = min(ImgZ, MaxSamples);
 RandIdx = randperm(ImgZ);
 RandIdx = RandIdx(1:NumRSamples);
 
@@ -28,11 +28,4 @@ end
 Rx = Rx/(NumRSamples*size(im,2));
 [E D] = eig(Rx);
 [~, ind] = sort(diag(D),'descend');
-V = E(:,ind(1:NumFilters));  % principal eigenvectors 
-
-
-
- 
-
-
-
+V = E(:,ind(1:NumFilters));  % principal eigenvectors
