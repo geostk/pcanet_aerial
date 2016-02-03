@@ -80,7 +80,6 @@ function [out] = loadFilesInCategory_impl(category_name, indeces)
     % out(p + 3, :) = full_image(:)';
     % full_image = imrotate(full_image, 90);
     % out(p + 4, :) = full_image(:)';
-
   end
 
 end
@@ -151,6 +150,7 @@ end
 fprintf('\n');
 
 save('../datasets/UCMerced_LandUse.mat', 'y', 'y_cv', 'y_t', 'X', 'X_cv', 'X_t', '-v7.3');
+
 
 fprintf('\nDone.\n');
 

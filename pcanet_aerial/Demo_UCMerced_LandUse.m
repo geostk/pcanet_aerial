@@ -82,11 +82,11 @@ StandardMappingMatrices = {
 
 % ==== Subsampling the Training and Testing sets ============
 % (comment out the following four lines for a complete test)
-every_nth_example = 80;
-TrnData = TrnData(1:every_nth_example:end,:);
-TrnLabels = TrnLabels(1:every_nth_example:end);
-TestData = TestData(1:every_nth_example:end,:);
-TestLabels = TestLabels(1:every_nth_example:end);
+% every_nth_example = 80;
+% TrnData = TrnData(1:every_nth_example:end,:);
+% TrnLabels = TrnLabels(1:every_nth_example:end);
+% TestData = TestData(1:every_nth_example:end,:);
+% TestLabels = TestLabels(1:every_nth_example:end);
 % ===========================================================
 
 nTestImg = length(TestLabels);
@@ -97,7 +97,7 @@ PCANet.NumStages = 2;
 PCANet.PatchSize = [7 7];
 PCANet.PoolingPatchSize = [2 2];
 PCANet.NumFilters = [8 8];
-PCANet.HistBlockSize = [8 8];
+PCANet.HistBlockSize = [16 16];
 PCANet.BlkOverLapRatio = 0.25;
 PCANet.Pyramid = [];
 PCANet.MappingMatrices = {
