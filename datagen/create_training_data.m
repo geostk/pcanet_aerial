@@ -32,7 +32,8 @@ CATEGORIES = {
   'tenniscourt'
 };
 
-IMAGES_PER_CATEGORY = 100;
+IMAGES_PER_CATEGORY = 400;
+IMAGEFILES_PER_CATEGORY = 100;
 
 TRAINGING_SET_PERCENTAGE = 0.8;
 CROSS_VALIDATION_SET_PERCENTAGE = 0.0;
@@ -46,8 +47,8 @@ TRAINGING_SET_Y_FILE = 'training_set_y.mat';
 CROSS_VALIDATION_SET_Y_FILE = 'cross_validation_set_y.mat';
 TEST_SET_Y_FILE = 'test_set_y.mat';
 
-IMAGES_WIDTH = 128;
-IMAGES_HEIGHT = 128;
+IMAGES_WIDTH = 64;
+IMAGES_HEIGHT = 64;
 NUMS_PER_PIXEL = 3;
 
 
@@ -65,7 +66,7 @@ end
 
 function [out] = loadFilesInCategory_impl(category_name, numbers)
 
-  out = precision_conv(zeros(length(numbers), IMAGES_WIDTH*IMAGES_HEIGHT*NUMS_PER_PIXEL));
+  out = precision_conv(zeros(length(numbers) * 4, IMAGES_WIDTH*IMAGES_HEIGHT*NUMS_PER_PIXEL));
 
 
   for i = 1:length(numbers)
@@ -81,32 +82,39 @@ function [out] = loadFilesInCategory_impl(category_name, numbers)
     %image_grayscale =  rgb2gray(full_image);
 
     %image_uint8 = im2uint8(image_grayscale);
-    full_image = imresize(full_image, 0.5);
+    full_image = imresize(full_image, 0.25);
     % image_uint8 = im2uint8(full_image);
     % full_image = im2single(full_image);
 
     %fprintf('%s [%d %d] <= [%d %d]\n', create_path_name(category_name, numbers(i)), size(out(i, :), 1),  size(out(i, :), 2), size(image_uint8(:)', 1), size(image_uint8(:)', 2));
     %out(i, :) = image_uint8(:)';kjjjjlkmklm
-    out(i, :) = full_image(:)';
+    p = (i-1)*4;
+    out(p + 1, :) = full_image(:)';
+    full_image = imrotate(full_image, 90);
+    out(p + 2, :) = full_image(:)';
+    full_image = imrotate(full_image, 90);
+    out(p + 3, :) = full_image(:)';
+    full_image = imrotate(full_image, 90);
+    out(p + 4, :) = full_image(:)';
 
   end
 
 end
 
 function [trainging_set, cross_validation_set, test_set] = loadFilesInCategory(category_name)
-  numbers = [0 randperm(IMAGES_PER_CATEGORY - 1)];
+  numbers = [0 randperm(IMAGEFILES_PER_CATEGORY - 1)];
 
-  trs_last_index = round(IMAGES_PER_CATEGORY * TRAINGING_SET_PERCENTAGE);
-  cvs_last_index = trs_last_index + round(IMAGES_PER_CATEGORY * CROSS_VALIDATION_SET_PERCENTAGE);
-  tss_last_index = cvs_last_index + round(IMAGES_PER_CATEGORY * TEST_SET_PERCENTAGE);
+  trs_last_index = round(IMAGEFILES_PER_CATEGORY * TRAINGING_SET_PERCENTAGE);
+  cvs_last_index = trs_last_index + round(IMAGEFILES_PER_CATEGORY * CROSS_VALIDATION_SET_PERCENTAGE);
+  tss_last_index = cvs_last_index + round(IMAGEFILES_PER_CATEGORY * TEST_SET_PERCENTAGE);
 
-  if tss_last_index ~= IMAGES_PER_CATEGORY
+  if tss_last_index ~= IMAGEFILES_PER_CATEGORY
     error('Percentages do not give us correct indecies!');
   end
 
   trainging_set = loadFilesInCategory_impl(category_name, numbers(1 : trs_last_index));
   cross_validation_set = loadFilesInCategory_impl(category_name, numbers(trs_last_index + 1 : cvs_last_index));
-  test_set = loadFilesInCategory_impl(category_name, numbers(cvs_last_index + 1 : IMAGES_PER_CATEGORY));
+  test_set = loadFilesInCategory_impl(category_name, numbers(cvs_last_index + 1 : IMAGEFILES_PER_CATEGORY));
 
 end
 
@@ -151,6 +159,8 @@ function [X, X_cv, X_t, y, y_cv, y_t] = loadDataset()
     xt_index = IMAGES_PER_CATEGORY * TEST_SET_PERCENTAGE + xt_index;
 
   end
+
+
 
 end
 
