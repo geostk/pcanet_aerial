@@ -11,38 +11,28 @@ clear all; close all; clc;
 addpath('./Utils');
 addpath('./Liblinear');
 
-%% Loading data from MNIST Basic (10000 training, 2000 validation, 50000 testing)
-% load mnist_basic data
 load('../datasets/UCMerced_LandUse');
 
 TrnSize = size(X, 2);
-ImgSize = 64; %28;
+ImgSize = 128; %28;
 ImgFormat = 'color'; %'color' or 'gray'
 
-
-% ===== Reshuffle the training data =====
-% Randnidx = randperm(size(mnist_train,1));
-% mnist_train = mnist_train(Randnidx,:);
-% =======================================
-
-TrnData = X / 256; %mnist_train(1:TrnSize,1:end-1)';  % partition the data into training set and validation set
-TrnLabels = y; %mnist_train(1:TrnSize,end);
-% ValData = mnist_train(TrnSize+1:end,1:end-1)';
-% ValLabels = mnist_train(TrnSize+1:end,end);
-clear X; % clear mnist_train;
+TrnData = X;
+TrnLabels = y;
+clear X;
 clear y;
 
-TestData = X_t / 256; %mnist_test(:,1:end-1)';
-TestLabels = y_t; %mnist_test(:,end);
-clear X_t; % clear mnist_test;
+TestData = X_t;
+TestLabels = y_t;
+clear X_t;
 clear y_t;
 
 % ==== Subsampling the Training and Testing sets ============
 % (comment out the following four lines for a complete test)
 % every_nth_example = 40;
-% TrnData = TrnData(1:every_nth_example:end,:);  % sample around 2500 training samples
-% TrnLabels = TrnLabels(1:every_nth_example:end); %
-% TestData = TestData(1:every_nth_example:end,:);  % sample around 1000 test samples
+% TrnData = TrnData(1:every_nth_example:end,:);
+% TrnLabels = TrnLabels(1:every_nth_example:end);
+% TestData = TestData(1:every_nth_example:end,:);
 % TestLabels = TestLabels(1:every_nth_example:end);
 % ===========================================================
 
@@ -53,7 +43,7 @@ nTestImg = length(TestLabels);
 PCANet.NumStages = 2;
 PCANet.PatchSize = [7 7];
 PCANet.NumFilters = [8 8];
-PCANet.HistBlockSize = [32 32];
+PCANet.HistBlockSize = [64 64];
 PCANet.BlkOverLapRatio = 0.25;
 PCANet.Pyramid = [];
 

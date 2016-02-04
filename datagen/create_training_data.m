@@ -1,8 +1,4 @@
-% create matrices representing grayscale images, devide them in trainging set,
-% cross validation set, and test set.
-% create y vectors.
-
-function create_training_data()
+function create_training_data(indeces)
 
 %% %%%%%%%%%%%%%%% Configuration Constants %%%%%%%%%%%%%
 
@@ -32,7 +28,7 @@ CATEGORIES = {
   'tenniscourt'
 };
 
-IMAGES_PER_CATEGORY = 400;
+IMAGES_PER_CATEGORY = 100;
 IMAGEFILES_PER_CATEGORY = 100;
 
 TRAINGING_SET_PERCENTAGE = 0.8;
@@ -47,8 +43,8 @@ TRAINGING_SET_Y_FILE = 'training_set_y.mat';
 CROSS_VALIDATION_SET_Y_FILE = 'cross_validation_set_y.mat';
 TEST_SET_Y_FILE = 'test_set_y.mat';
 
-IMAGES_WIDTH = 64;
-IMAGES_HEIGHT = 64;
+IMAGES_WIDTH = 128;
+IMAGES_HEIGHT = 128;
 NUMS_PER_PIXEL = 3;
 
 
@@ -64,57 +60,43 @@ function [out] = precision_conv(in)
   out = in;
 end
 
-function [out] = loadFilesInCategory_impl(category_name, numbers)
+function [out] = loadFilesInCategory_impl(category_name, indeces)
 
-  out = precision_conv(zeros(length(numbers) * 4, IMAGES_WIDTH*IMAGES_HEIGHT*NUMS_PER_PIXEL));
+  out = precision_conv(zeros(length(indeces), IMAGES_WIDTH*IMAGES_HEIGHT*NUMS_PER_PIXEL));
 
+  for i = 1:length(indeces)
+    image_path = create_path_name(category_name, indeces(i));
 
-  for i = 1:length(numbers)
-    image_path = create_path_name(category_name, numbers(i));
+    full_image = im2double(imread(image_path));
 
-    % load image
-    % convert to grayscale
-    % convert to uint8 representation
-    % unfold it and save it to matrix
+    full_image = imresize(full_image, 0.5);
 
-    full_image = imread(image_path);
-    %fprintf('<%s> [%d %d %d]\n', create_path_name(category_name, numbers(i)), size(full_image, 1), size(full_image, 2), size(full_image, 3));
-    %image_grayscale =  rgb2gray(full_image);
-
-    %image_uint8 = im2uint8(image_grayscale);
-    full_image = imresize(full_image, 0.25);
-    % image_uint8 = im2uint8(full_image);
-    % full_image = im2single(full_image);
-
-    %fprintf('%s [%d %d] <= [%d %d]\n', create_path_name(category_name, numbers(i)), size(out(i, :), 1),  size(out(i, :), 2), size(image_uint8(:)', 1), size(image_uint8(:)', 2));
-    %out(i, :) = image_uint8(:)';kjjjjlkmklm
-    p = (i-1)*4;
-    out(p + 1, :) = full_image(:)';
-    full_image = imrotate(full_image, 90);
-    out(p + 2, :) = full_image(:)';
-    full_image = imrotate(full_image, 90);
-    out(p + 3, :) = full_image(:)';
-    full_image = imrotate(full_image, 90);
-    out(p + 4, :) = full_image(:)';
+    out(i, :) = full_image(:)';
+    % p = (i-1)*4;
+    % out(p + 1, :) = full_image(:)';
+    % full_image = imrotate(full_image, 90);
+    % out(p + 2, :) = full_image(:)';
+    % full_image = imrotate(full_image, 90);
+    % out(p + 3, :) = full_image(:)';
+    % full_image = imrotate(full_image, 90);
+    % out(p + 4, :) = full_image(:)';
 
   end
 
 end
 
 function [trainging_set, cross_validation_set, test_set] = loadFilesInCategory(category_name)
-  numbers = [0 randperm(IMAGEFILES_PER_CATEGORY - 1)];
-
   trs_last_index = round(IMAGEFILES_PER_CATEGORY * TRAINGING_SET_PERCENTAGE);
   cvs_last_index = trs_last_index + round(IMAGEFILES_PER_CATEGORY * CROSS_VALIDATION_SET_PERCENTAGE);
   tss_last_index = cvs_last_index + round(IMAGEFILES_PER_CATEGORY * TEST_SET_PERCENTAGE);
 
   if tss_last_index ~= IMAGEFILES_PER_CATEGORY
-    error('Percentages do not give us correct indecies!');
+    error('Percentages do not give us correct indeces!');
   end
 
-  trainging_set = loadFilesInCategory_impl(category_name, numbers(1 : trs_last_index));
-  cross_validation_set = loadFilesInCategory_impl(category_name, numbers(trs_last_index + 1 : cvs_last_index));
-  test_set = loadFilesInCategory_impl(category_name, numbers(cvs_last_index + 1 : IMAGEFILES_PER_CATEGORY));
+  trainging_set = loadFilesInCategory_impl(category_name, indeces(1 : trs_last_index));
+  cross_validation_set = loadFilesInCategory_impl(category_name, indeces(trs_last_index + 1 : cvs_last_index));
+  test_set = loadFilesInCategory_impl(category_name, indeces(cvs_last_index + 1 : IMAGEFILES_PER_CATEGORY));
 
 end
 
@@ -164,29 +146,11 @@ function [X, X_cv, X_t, y, y_cv, y_t] = loadDataset()
 
 end
 
-function [] = saveMatrix(filename, matrix)
-  fprintf('saving matrix [%d %d] to file %s \n', size(matrix, 1), size(matrix, 2), filename);
-  fileID = fopen(filename, 'w');
-  fwrite(fileID, matrix, 'uint8');
-
-end
-
-
 [X, X_cv, X_t, y, y_cv, y_t] = loadDataset();
-
-
 
 fprintf('\n');
 
-% saveMatrix(TRAINGING_SET_X_FILE, X);
-% saveMatrix(CROSS_VALIDATION_SET_X_FILE, X_cv);
-% saveMatrix(TEST_SET_X_FILE, X_t);
-%
-% saveMatrix(TRAINGING_SET_Y_FILE, y);
-% saveMatrix(CROSS_VALIDATION_SET_Y_FILE, y_cv);
-% saveMatrix(TEST_SET_Y_FILE, y_t);
-
-save('../datasets/UCMerced_LandUse.mat', 'y', 'y_cv', 'y_t', 'X', 'X_cv', 'X_t');
+save('../datasets/UCMerced_LandUse.mat', 'y', 'y_cv', 'y_t', 'X', 'X_cv', 'X_t', '-v7.3');
 
 fprintf('\nDone.\n');
 
