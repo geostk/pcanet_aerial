@@ -33,49 +33,92 @@ if length(PCANet.NumFilters)~= PCANet.NumStages;
     return
 end
 
+
 NumImg = length(InImg);
 
-V = cell(PCANet.NumStages,1);
 ImgIdx = (1:NumImg)';
-OutImg = InImg;
+
 
 if exist('ImgFormat') & strcmp(ImgFormat,'color')
   [OutImg ImgIdx] = separate_image_layers(InImg, ImgIdx);
+else
+  OutImg = InImg;
 end
 
-clear InImg;
+function [OutImg ImgIdx V] = process_stage(stage, PCANet, InImg, InImgIdx)
 
-for stage = 1:PCANet.NumStages
-    display(['Computing PCA filter bank and its outputs at stage ' num2str(stage) '...'])
+    prevNumFilters = PCANet.NumFilters(stage - 1);
+    InImgSubsets = cell(prevNumFilters, 1);
+    InImgIdxSubsets = cell(prevNumFilters, 1);
+    ImgPerSubset = length(InImg)/prevNumFilters;
 
-    V{stage} = PCA_FilterBank(OutImg, PCANet.PatchSize(stage), PCANet.NumFilters(stage)); % compute PCA filter banks
+    % initialize subsets:
+    for i = 1:prevNumFilters
+      InImgSubsets{i} = cell(ImgPerSubset, 1);
+      InImgIdxSubsets{i} = zeros(ImgPerSubset, 1);
+      for j = 1:ImgPerSubset
+        InImgSubsets{i}{j} = zeros(size(InImg{1}));
+        InImgIdxSubsets{i}(j) = InImgIdx(j*prevNumFilters);
+      end
 
-    if stage ~= PCANet.NumStages % compute the PCA outputs only when it is NOT the last stage
-        [OutImg ImgIdx] = PCA_output(OutImg, ImgIdx, ...
-            PCANet.PatchSize(stage), PCANet.NumFilters(stage), V{stage});
     end
+
+    % put input images in right subsets:
+    for i = 1:length(InImg)
+      fnum = mod(i, prevNumFilters) + 1; % ith image is produced by fnumth filter from prevous layer
+      imgorig = ceil(i / prevNumFilters); % ith image is produced by convoluting imgorigth input image from previous layer
+
+      for j = 1:prevNumFilters
+        if PCANet.MappingMatrices{stage - 1}(fnum, j)
+          InImgSubsets{j}{imgorig} = InImgSubsets{j}{imgorig} + InImg{i};
+        end
+      end
+    end
+
+    % create filters:
+    V.filters = cell(prevNumFilters, 1);
+    for i = 1:prevNumFilters
+      V.filters{i} = PCA_FilterBank(InImgSubsets{i}, PCANet.PatchSize(stage), PCANet.NumFilters(stage));
+    end
+
+  OutImgSubsets = cell(prevNumFilters, 1);
+  OutImgIdxSubsets = cell(prevNumFilters, 1);
+
+  % compute filters' outputs:
+  for i = 1:prevNumFilters
+    [OutImgSubsets{i} OutImgIdxSubsets{i}] = PCA_output(InImgSubsets{i}, InImgIdxSubsets{i}, ...
+         PCANet.PatchSize(stage), PCANet.NumFilters(stage), V.filters{i}, PCANet.PoolingPatchSize);
+  end
+
+  % propagate to the next layer if required:
+  if stage < PCANet.NumStages
+    display(['Processing layer ' num2str(stage + 1) '...'])
+    V.next_stage = cell(prevNumFilters, 1);
+    for i = 1:prevNumFilters
+      [OutImgSubsets{i} OutImgIdxSubsets{i} V.next_stage{i}] = process_stage(stage + 1, PCANet, OutImgSubsets{i}, OutImgIdxSubsets{i});
+    end
+  end
+
+  % assemble output:
+  OutImg = vertcat(OutImgSubsets{:});
+  ImgIdx = vertcat(OutImgIdxSubsets{:});
+
+end % end of process_stage
+
+display(['Processing layer ' num2str(1) '...'])
+
+V.filters = cell(1,1);
+V.next_stage = cell(1,1);
+V.filters{1} = PCA_FilterBank(OutImg, PCANet.PatchSize(1), PCANet.NumFilters(1));
+
+[OutImg ImgIdx] = PCA_output(OutImg, ImgIdx, ...
+     PCANet.PatchSize(1), PCANet.NumFilters(1), V.filters{1}, PCANet.PoolingPatchSize);
+
+if PCANet.NumStages > 1
+  display(['Processing layer ' num2str(2) '...'])
+  [OutImg ImgIdx V.next_stage{1}] = process_stage(2, PCANet, OutImg, ImgIdx);
 end
 
-if IdtExt == 1 % enable feature extraction
-    %display('PCANet training feature extraction...')
+[f BlkIdx] = HashingHist(PCANet,ImgIdx,OutImg);
 
-    f = cell(NumImg,1); % compute the PCANet training feature one by one
-
-    for idx = 1:NumImg
-        if 0==mod(idx,100); display(['Extracting PCANet feasture of the ' num2str(idx) 'th training sample...']); end
-        OutImgIndex = ImgIdx==idx; % select feature maps corresponding to image "idx" (outputs of the-last-but-one PCA filter bank)
-
-        [OutImg_i ImgIdx_i] = PCA_output(OutImg(OutImgIndex), ones(sum(OutImgIndex),1),...
-            PCANet.PatchSize(end), PCANet.NumFilters(end), V{end});  % compute the last PCA outputs of image "idx"
-
-        [f{idx} BlkIdx] = HashingHist(PCANet,ImgIdx_i,OutImg_i); % compute the feature of image "idx"
-%        [f{idx} BlkIdx] = SphereSum(PCANet,ImgIdx_i,OutImg_i); % Testing!!
-        OutImg(OutImgIndex) = cell(sum(OutImgIndex),1);
-
-    end
-    f = sparse([f{:}]);
-
-else  % disable feature extraction
-    f = [];
-    BlkIdx = [];
 end

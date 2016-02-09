@@ -27,13 +27,66 @@ TestLabels = y_t;
 clear X_t;
 clear y_t;
 
+StandardMappingMatrices = {
+  [1],
+  [
+  1, 0;
+  0, 1;
+  ],
+  [
+  1, 1, 0;
+  0, 1, 1;
+  1, 0, 1;
+  ],
+  [
+    1, 1, 0, 0;
+    0, 1, 1, 0;
+    0, 0, 1, 1;
+    1, 0, 0, 1;
+  ],
+  [
+    1, 1, 0, 0, 0;
+    0, 1, 1, 0, 0;
+    0, 0, 1, 1, 0;
+    0, 0, 0, 1, 1;
+    1, 0, 0, 0, 1;
+  ],
+  [
+    1, 1, 0, 0, 0, 0;
+    0, 1, 1, 0, 0, 0;
+    0, 0, 1, 1, 0, 0;
+    0, 0, 0, 1, 1, 0;
+    0, 0, 0, 0, 1, 1;
+    1, 0, 0, 0, 0, 1;
+  ],
+  [
+    1, 1, 0, 0, 0, 0, 0;
+    0, 1, 1, 0, 0, 0, 0;
+    0, 0, 1, 1, 0, 0, 0;
+    0, 0, 0, 1, 1, 0, 0;
+    0, 0, 0, 0, 1, 1, 0;
+    0, 0, 0, 0, 0, 1, 1;
+    1, 0, 0, 0, 0, 0, 1;
+  ],
+  [
+    1, 1, 0, 0, 0, 0, 0, 0;
+    0, 1, 1, 0, 0, 0, 0, 0;
+    0, 0, 1, 1, 0, 0, 0, 0;
+    0, 0, 0, 1, 1, 0, 0, 0;
+    0, 0, 0, 0, 1, 1, 0, 0;
+    0, 0, 0, 0, 0, 1, 1, 0;
+    0, 0, 0, 0, 0, 0, 1, 1;
+    1, 0, 0, 0, 0, 0, 0, 1;
+  ]
+};
+
 % ==== Subsampling the Training and Testing sets ============
 % (comment out the following four lines for a complete test)
-% every_nth_example = 40;
-% TrnData = TrnData(1:every_nth_example:end,:);
-% TrnLabels = TrnLabels(1:every_nth_example:end);
-% TestData = TestData(1:every_nth_example:end,:);
-% TestLabels = TestLabels(1:every_nth_example:end);
+every_nth_example = 80;
+TrnData = TrnData(1:every_nth_example:end,:);
+TrnLabels = TrnLabels(1:every_nth_example:end);
+TestData = TestData(1:every_nth_example:end,:);
+TestLabels = TestLabels(1:every_nth_example:end);
 % ===========================================================
 
 nTestImg = length(TestLabels);
@@ -42,10 +95,14 @@ nTestImg = length(TestLabels);
 % We use the parameters in our IEEE TPAMI submission
 PCANet.NumStages = 2;
 PCANet.PatchSize = [7 7];
+PCANet.PoolingPatchSize = [2 2];
 PCANet.NumFilters = [8 8];
-PCANet.HistBlockSize = [64 64];
+PCANet.HistBlockSize = [8 8];
 PCANet.BlkOverLapRatio = 0.25;
 PCANet.Pyramid = [];
+PCANet.MappingMatrices = {
+  StandardMappingMatrices{8}
+};
 
 fprintf('\n ====== PCANet Parameters ======= \n')
 PCANet
