@@ -1,4 +1,4 @@
-function V = PCA_FilterBank(InImg, PatchSize, NumFilters)
+function V = PCA_FilterBank(InImg, PatchSize, PatchingStep, NumFilters)
 % =======INPUT=============
 % InImg            Input images (cell structure)
 % PatchSize        the patch size, asumed to an odd number.
@@ -22,7 +22,7 @@ NumChls = size(InImg{1},3);
 Rx = zeros(NumChls*PatchSize^2,NumChls*PatchSize^2);
 
 for i = RandIdx %1:ImgZ
-    im = im2col_mean_removal(InImg{i},[PatchSize PatchSize]); % collect all the patches of the ith image in a matrix, and perform patch mean removal
+    im = im2col_mean_removal(InImg{i},[PatchSize PatchSize], [PatchingStep PatchingStep]); % collect all the patches of the ith image in a matrix, and perform patch mean removal
     Rx = Rx + im*im'; % sum of all the input images' covariance matrix
 end
 Rx = Rx/(NumRSamples*size(im,2));

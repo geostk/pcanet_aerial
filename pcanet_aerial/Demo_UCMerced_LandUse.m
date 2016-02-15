@@ -30,13 +30,13 @@ clear y_t;
 StandardMappingMatrices = {
   [1],
   [
-  1, 0;
-  0, 1;
+    1, 0;
+    0, 1;
   ],
   [
-  1, 1, 0;
-  0, 1, 1;
-  1, 0, 1;
+    1, 1, 0;
+    0, 1, 1;
+    1, 0, 1;
   ],
   [
     1, 1, 0, 0;
@@ -95,10 +95,11 @@ nTestImg = length(TestLabels);
 % We use the parameters in our IEEE TPAMI submission
 PCANet.NumStages = 2;
 PCANet.PatchSize = [7 7];
+PCANet.PatchingStep = [3 3];
 PCANet.PoolingPatchSize = [2 2];
 PCANet.NumFilters = [8 8];
-PCANet.HistBlockSize = [16 16];
-PCANet.BlkOverLapRatio = 0.25;
+PCANet.HistBlockSize = [32 32];
+PCANet.BlkOverLapRatio = 0.0;
 PCANet.Pyramid = [];
 PCANet.MappingMatrices = {
   StandardMappingMatrices{8}

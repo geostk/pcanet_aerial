@@ -26,7 +26,7 @@ for i = 1:ImgZ
     im = im2col_mean_removal(img,[PatchSize PatchSize]); % collect all the patches of the ith image in a matrix, and perform patch mean removal
     for j = 1:NumFilters
         cnt = cnt + 1;
-        [OutImg{cnt} max_idcs] = MaxPooling(reshape(V(:,j)'*im,ImgX,ImgY), [PoolingPatchSize PoolingPatchSize]);  % convolution output + max-pooling
+        [OutImg{cnt} ~] = AvgPooling(reshape(V(:,j)'*im,ImgX,ImgY), [PoolingPatchSize PoolingPatchSize]);  % convolution output + pooling
     end
     InImg{i} = [];
 end

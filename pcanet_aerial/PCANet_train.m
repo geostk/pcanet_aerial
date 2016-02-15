@@ -45,13 +45,11 @@ else
           OutImg = InImg;
 end
 
-clearvars TrnData_ImgCell
-
 display(['Processing layer ' num2str(1) '...'])
 
 V.filters = cell(1,1);
 V.next_stage = cell(1,1);
-V.filters{1} = PCA_FilterBank(OutImg, PCANet.PatchSize(1), PCANet.NumFilters(1));
+V.filters{1} = PCA_FilterBank(OutImg, PCANet.PatchSize(1), PCANet.PatchingStep(1), PCANet.NumFilters(1));
 
 [OutImg ImgIdx] = PCA_output(OutImg, ImgIdx, ...
      PCANet.PatchSize(1), PCANet.NumFilters(1), V.filters{1}, PCANet.PoolingPatchSize(1));
@@ -100,7 +98,7 @@ display('cleared mem, shoud be OK now');
 % create filters:
 V2.filters = cell(prevNumFilters, 1);
 for i = 1:prevNumFilters
-    V2.filters{i} = PCA_FilterBank(ImgSubsets{i}, PCANet.PatchSize(stage), PCANet.NumFilters(stage));
+    V2.filters{i} = PCA_FilterBank(ImgSubsets{i}, PCANet.PatchSize(stage), PCANet.PatchingStep(1), PCANet.NumFilters(stage));
 end
 V.next_stage{1} = V2;
 
