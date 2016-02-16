@@ -14,7 +14,7 @@ addpath('./Liblinear');
 load('../datasets/UCMerced_LandUse');
 
 TrnSize = size(X, 2);
-ImgSize = 128; %28;
+ImgSize = 256; %28;
 ImgFormat = 'color'; %'color' or 'gray'
 
 TrnData = X;
@@ -99,7 +99,7 @@ PCANet.PatchingStep = [3 3];
 PCANet.PoolingPatchSize = [2 2];
 PCANet.NumFilters = [8 8];
 PCANet.HistBlockSize = [32 32];
-PCANet.BlkOverLapRatio = 0.0;
+PCANet.BlkOverLapRatio = 0.25;
 PCANet.Pyramid = [];
 PCANet.MappingMatrices = {
   StandardMappingMatrices{8}

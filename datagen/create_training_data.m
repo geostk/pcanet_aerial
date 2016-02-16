@@ -43,8 +43,8 @@ TRAINGING_SET_Y_FILE = 'training_set_y.mat';
 CROSS_VALIDATION_SET_Y_FILE = 'cross_validation_set_y.mat';
 TEST_SET_Y_FILE = 'test_set_y.mat';
 
-IMAGES_WIDTH = 128;
-IMAGES_HEIGHT = 128;
+IMAGES_WIDTH = 256;
+IMAGES_HEIGHT = 256;
 NUMS_PER_PIXEL = 3;
 
 
@@ -69,7 +69,7 @@ function [out] = loadFilesInCategory_impl(category_name, indeces)
 
     full_image = im2double(imread(image_path));
 
-    full_image = imresize(full_image, 0.5);
+    % full_image = imresize(full_image, 0.5);
 
     out(i, :) = full_image(:)';
     % p = (i-1)*4;
