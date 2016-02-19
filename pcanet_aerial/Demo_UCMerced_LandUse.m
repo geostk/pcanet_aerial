@@ -27,58 +27,7 @@ TestLabels = y_t;
 clear X_t;
 clear y_t;
 
-StandardMappingMatrices = {
-  [1],
-  [
-    1, 0;
-    0, 1;
-  ],
-  [
-    1, 1, 0;
-    0, 1, 1;
-    1, 0, 1;
-  ],
-  [
-    1, 1, 0, 0;
-    0, 1, 1, 0;
-    0, 0, 1, 1;
-    1, 0, 0, 1;
-  ],
-  [
-    1, 1, 0, 0, 0;
-    0, 1, 1, 0, 0;
-    0, 0, 1, 1, 0;
-    0, 0, 0, 1, 1;
-    1, 0, 0, 0, 1;
-  ],
-  [
-    1, 1, 0, 0, 0, 0;
-    0, 1, 1, 0, 0, 0;
-    0, 0, 1, 1, 0, 0;
-    0, 0, 0, 1, 1, 0;
-    0, 0, 0, 0, 1, 1;
-    1, 0, 0, 0, 0, 1;
-  ],
-  [
-    1, 1, 0, 0, 0, 0, 0;
-    0, 1, 1, 0, 0, 0, 0;
-    0, 0, 1, 1, 0, 0, 0;
-    0, 0, 0, 1, 1, 0, 0;
-    0, 0, 0, 0, 1, 1, 0;
-    0, 0, 0, 0, 0, 1, 1;
-    1, 0, 0, 0, 0, 0, 1;
-  ],
-  [
-    1, 1, 0, 0, 0, 0, 0, 0;
-    0, 1, 1, 0, 0, 0, 0, 0;
-    0, 0, 1, 1, 0, 0, 0, 0;
-    0, 0, 0, 1, 1, 0, 0, 0;
-    0, 0, 0, 0, 1, 1, 0, 0;
-    0, 0, 0, 0, 0, 1, 1, 0;
-    0, 0, 0, 0, 0, 0, 1, 1;
-    1, 0, 0, 0, 0, 0, 0, 1;
-  ]
-};
+StandardMappingMatrices = loadStandardMappingMatrices();
 
 % ==== Subsampling the Training and Testing sets ============
 % (comment out the following four lines for a complete test)
@@ -97,12 +46,12 @@ PCANet.NumStages = 2;
 PCANet.PatchSize = [7 7];
 PCANet.PatchingStep = [3 3];
 PCANet.PoolingPatchSize = [2 2];
-PCANet.NumFilters = [8 8];
-PCANet.HistBlockSize = [32 32];
-PCANet.BlkOverLapRatio = 0.25;
+PCANet.NumFilters = [16 16];
+PCANet.HistBlockSize = [64 64];
+PCANet.BlkOverLapRatio = 0.0;
 PCANet.Pyramid = [];
 PCANet.MappingMatrices = {
-  StandardMappingMatrices{8}
+  StandardMappingMatrices{16}
 };
 
 fprintf('\n ====== PCANet Parameters ======= \n')

@@ -35,11 +35,11 @@ NumImg = length(InImg);
 
 ImgIdx = (1:NumImg)';
 
-if exist('ImgFormat') & strcmp(ImgFormat,'color')
-  [OutImg ImgIdx] = separate_image_layers(InImg, ImgIdx);
-else
+% if exist('ImgFormat') & strcmp(ImgFormat,'color')
+%   [OutImg ImgIdx] = separate_image_layers(InImg, ImgIdx);
+% else
   OutImg = InImg;
-end
+% end
 
 clear InImg;
 
