@@ -85,24 +85,45 @@ end
 clear InImg;
 clear InImgIdx;
 
-ft = cell(prevNumFilters,1);
+% ft = cell(prevNumFilters,1);
+finalSubsets = cell(prevNumFilters, NumImg);
 
 % compute filters' outputs:
 for i = 1:prevNumFilters
  [ImgSubsets{i} ImgIdxSubsets{i}] = PCA_output(ImgSubsets{i}, ImgIdxSubsets{i}, ...
          PCANet.PatchSize(stage), PCANet.NumFilters(stage), V.filters{i}, PCANet.PoolingPatchSize(stage));
 
- [ft{i}] = sparse(HashingHist(PCANet, ImgIdxSubsets{i}, ImgSubsets{i}));
+ % [ft{i}] = sparse(HashingHist(PCANet, ImgIdxSubsets{i}, ImgSubsets{i}));
+ for j = 1:NumImg
+     finalSubsets{i, j} = VectorizeCellElements({ImgSubsets{i}{find(ImgIdxSubsets{i} == j)}});
+ end
 
  ImgIdxSubsets{i} = [];
  ImgSubsets{i} = [];
 end
 
-
 clear ImgSubsets;
 clear ImgIdxSubsets;
 
-f = sparse(vertcat(ft{:}));
+finalColumnSets = cell(NumImg, 1);
+
+% convert 2D images to columns
+numImgsPerSubset = length(finalSubsets{1, 1});
+imgColumnLength = length(finalSubsets{1, 1}{1});
+numElementPerPrevFilter = numImgsPerSubset * imgColumnLength;
+for i = 1:NumImg
+    finalColumnSets{i} = zeros(prevNumFilters * numElementPerPrevFilter, 1);
+    for j = 1:prevNumFilters
+        finalColumnSets{i}((j-1)*numElementPerPrevFilter+1:j*numElementPerPrevFilter) = vertcat(finalSubsets{j, i}{:});
+        finalSubsets{j, i} = {};
+    end
+end
+
+clear finalSubsets;
+
+f = sparse([finalColumnSets{:}]);
+
+% f = sparse(vertcat(ft{:}));
 
 BlkIdx = [];
 
