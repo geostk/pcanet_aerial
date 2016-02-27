@@ -46,12 +46,12 @@ PCANet.NumStages = 2;
 PCANet.PatchSize = [7 7];
 PCANet.PatchingStep = [3 3];
 PCANet.PoolingPatchSize = [2 2];
-PCANet.NumFilters = [16 16];
+PCANet.NumFilters = [32 16];
 PCANet.HistBlockSize = [64 64];
 PCANet.BlkOverLapRatio = 0.0;
 PCANet.Pyramid = [];
 PCANet.MappingMatrices = {
-  StandardMappingMatrices{16}
+  StandardMappingMatrices{32}
 };
 
 fprintf('\n ====== PCANet Parameters ======= \n')
