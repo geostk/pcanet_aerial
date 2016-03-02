@@ -60,14 +60,15 @@ if IdtExt == 1 % enable feature extraction
         if 0==mod(idx,100); display(['Extracting PCANet feasture of the ' num2str(idx) 'th training sample...']); end
         OutImgIndex = ImgIdx==idx; % select feature maps corresponding to image "idx" (outputs of the-last-but-one PCA filter bank)
 
-        [OutImg_i ImgIdx_i] = PCA_output(OutImg(OutImgIndex), ones(sum(OutImgIndex),1),...
+        [OutImg_i ImgIdx_i] = PCA_output({OutImg{idx}}, ones(sum(OutImgIndex),1),...
             PCANet.PatchSize(end), PCANet.NumFilters(end), V{end});  % compute the last PCA outputs of image "idx"
 
         [f{idx} BlkIdx] = HashingHist(PCANet,ImgIdx_i,OutImg_i); % compute the feature of image "idx"
 %        [f{idx} BlkIdx] = SphereSum(PCANet,ImgIdx_i,OutImg_i); % Testing!!
-        OutImg(OutImgIndex) = cell(sum(OutImgIndex),1);
+        OutImg{idx} = [];
 
     end
+
     f = sparse([f{:}]);
 
 else  % disable feature extraction

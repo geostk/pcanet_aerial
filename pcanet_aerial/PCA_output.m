@@ -16,16 +16,17 @@ addpath('./Utils')
 ImgZ = length(InImg);
 mod_pmt = mod(PatchSize, 2);
 mag = (PatchSize - mod_pmt)/2;
-OutImg = cell(NumFilters*ImgZ,1);
-cnt = 0;
+OutImg = cell(ImgZ,1);
+
 for i = 1:ImgZ
     [ImgX, ImgY, NumChls] = size(InImg{i});
     img = zeros(ImgX+PatchSize-1,ImgY+PatchSize-1, NumChls);
     img((mag + mod_pmt):end-mag,(mag + mod_pmt):end-mag,:) = InImg{i};
     im = im2col_mean_removal(img,[PatchSize PatchSize]); % collect all the patches of the ith image in a matrix, and perform patch mean removal
+
+    OutImg{i} = zeros(ImgX, ImgY, NumFilters);
     for j = 1:NumFilters
-        cnt = cnt + 1;
-        OutImg{cnt} = reshape(V(:,j)'*im,ImgX,ImgY);  % convolution output
+        OutImg{i}(:,:,j) = reshape(V(:,j)'*im,ImgX,ImgY);  % convolution output
     end
     InImg{i} = [];
 end
