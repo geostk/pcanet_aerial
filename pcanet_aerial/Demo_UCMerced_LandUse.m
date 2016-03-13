@@ -10,10 +10,11 @@
 clear all; close all; clc;
 addpath('./Utils');
 addpath('./Liblinear');
+run('./vlfeat/toolbox/vl_setup.m');
 
 %% Loading data from MNIST Basic (10000 training, 2000 validation, 50000 testing)
 % load mnist_basic data
-load('../datasets/UCMerced_LandUse');
+load('../datasets/UCMerced_LandUse_reduced');
 
 TrnSize = size(X, 2);
 ImgSize = 256; %28;
@@ -39,11 +40,11 @@ clear y_t;
 
 % ==== Subsampling the Training and Testing sets ============
 % (comment out the following four lines for a complete test)
-every_nth_example = 80;
-TrnData = TrnData(1:every_nth_example:end,:);  % sample around 2500 training samples
-TrnLabels = TrnLabels(1:every_nth_example:end); %
-TestData = TestData(1:every_nth_example:end,:);  % sample around 1000 test samples
-TestLabels = TestLabels(1:every_nth_example:end);
+% every_nth_example = 80;
+% TrnData = TrnData(1:every_nth_example:end,:);  % sample around 2500 training samples
+% TrnLabels = TrnLabels(1:every_nth_example:end); %
+% TestData = TestData(1:every_nth_example:end,:);  % sample around 1000 test samples
+% TestLabels = TestLabels(1:every_nth_example:end);
 % ===========================================================
 
 nTestImg = length(TestLabels);
@@ -52,9 +53,10 @@ nTestImg = length(TestLabels);
 % We use the parameters in our IEEE TPAMI submission
 PCANet.NumStages = 2;
 PCANet.PatchSize = [7 7];
-PCANet.NumFilters = [32 20];
+PCANet.NumFilters = [8 8];
+PCANet.kmTrainStep = [32 32];
 PCANet.HistBlockSize = [64 64];
-PCANet.BlkOverLapRatio = 0.0;
+PCANet.BlkOverLapRatio = 0.25;
 PCANet.Pyramid = [];
 
 fprintf('\n ====== PCANet Parameters ======= \n')
@@ -68,9 +70,10 @@ clear TrnData;
 
 fprintf('Number of training samples: %d \n', length(TrnData_ImgCell))
 tic;
-[ftrain V BlkIdx] = PCANet_train(TrnData_ImgCell,PCANet,1); % BlkIdx serves the purpose of learning block-wise DR projection matrix; e.g., WPCA
+[ftrain V centroids train_norm] = PCANet_train(TrnData_ImgCell, PCANet);
 PCANet_TrnTime = toc;
 clear TrnData_ImgCell;
+
 
 fprintf('\n ====== Training Linear SVM Classifier ======= \n')
 tic;
@@ -96,7 +99,7 @@ RecHistory = zeros(nTestImg,1);
 tic;
 for idx = 1:1:nTestImg
 
-    ftest = PCANet_FeaExt(TestData_ImgCell(idx),V,PCANet); % extract a test feature using trained PCANet model
+    ftest = PCANet_FeaExt(TestData_ImgCell(idx), V, centroids, train_norm, PCANet); % extract a test feature using trained PCANet model
 
     [xLabel_est, accuracy, decision_values] = predict(TestLabels(idx),...
         sparse(ftest'), models, '-q'); % label predictoin by libsvm

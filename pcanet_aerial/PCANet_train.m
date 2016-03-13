@@ -1,4 +1,4 @@
-function [f V BlkIdx] = PCANet_train(InImg,PCANet,IdtExt)
+function [f V centroids train_norm] = PCANet_train(InImg,PCANet)
 % =======INPUT=============
 % InImg     Input images (cell); each cell can be either a matrix (Gray) or a 3D tensor (RGB)
 % PCANet    PCANet parameters (struct)
@@ -45,33 +45,39 @@ for stage = 1:PCANet.NumStages
 
     V{stage} = PCA_FilterBank(OutImg, PCANet.PatchSize(stage), PCANet.NumFilters(stage)); % compute PCA filter banks
 
-    if stage ~= PCANet.NumStages % compute the PCA outputs only when it is NOT the last stage
+    % if stage ~= PCANet.NumStages % compute the PCA outputs only when it is NOT the last stage
         [OutImg ImgIdx] = PCA_output(OutImg, ImgIdx, ...
             PCANet.PatchSize(stage), PCANet.NumFilters(stage), V{stage});
-    end
+    % end
 end
 
-if IdtExt == 1 % enable feature extraction
-    %display('PCANet training feature extraction...')
-
-    f = cell(NumImg,1); % compute the PCANet training feature one by one
-
-    for idx = 1:NumImg
-        if 0==mod(idx,100); display(['Extracting PCANet feasture of the ' num2str(idx) 'th training sample...']); end
-        OutImgIndex = ImgIdx==idx; % select feature maps corresponding to image "idx" (outputs of the-last-but-one PCA filter bank)
-
-        [OutImg_i ImgIdx_i] = PCA_output({OutImg{idx}}, ones(sum(OutImgIndex),1),...
-            PCANet.PatchSize(end), PCANet.NumFilters(end), V{end});  % compute the last PCA outputs of image "idx"
-
-        [f{idx} BlkIdx] = HashingHist(PCANet,ImgIdx_i,OutImg_i); % compute the feature of image "idx"
-%        [f{idx} BlkIdx] = SphereSum(PCANet,ImgIdx_i,OutImg_i); % Testing!!
-        OutImg{idx} = [];
-
-    end
-
-    f = sparse([f{:}]);
-
-else  % disable feature extraction
-    f = [];
-    BlkIdx = [];
+% gather data for kmeans
+kmTrainStep = [32 32];
+imgSizeX = size(OutImg{1}, 1);
+imgSizeY = size(OutImg{1}, 2);
+kmVectorsPerImg = (imgSizeX/PCANet.kmTrainStep(1))*(imgSizeY/PCANet.kmTrainStep(2));
+kMeansData = zeros(PCANet.NumFilters(stage), kmVectorsPerImg * length(OutImg) );
+for idx = 1:length(OutImg)
+    tmp = OutImg{idx}(1:kmTrainStep(1):imgSizeX, 1:kmTrainStep(2):imgSizeY, :);
+    tmp = reshape(permute(tmp, [3 2 1]), PCANet.NumFilters(stage), []);
+    kMeansData(:,(idx-1)*kmVectorsPerImg+1:idx*kmVectorsPerImg) = tmp;
 end
+
+% apply kmeans algorith to get centroids
+numClusters = kmVectorsPerImg;
+[centroids, ~] = vl_kmeans(kMeansData, numClusters, 'Initialization', 'plusplus');
+
+f = cell(NumImg,1); % compute the PCANet training feature one by one
+
+for idx = 1:NumImg
+    if 0==mod(idx,100); display(['Extracting PCANet feature of the ' num2str(idx) 'th training sample...']); end
+
+    f{idx} = CentroidHist(OutImg{idx}, centroids, PCANet.HistBlockSize, PCANet.BlkOverLapRatio);
+
+    OutImg{idx} = [];
+
+end
+
+f = sparse([f{:}]);
+train_norm = max(max(abs(f)));
+f = sparse(f * (1 / train_norm));
