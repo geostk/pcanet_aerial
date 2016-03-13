@@ -16,9 +16,8 @@ addpath('./Liblinear');
 load('../datasets/UCMerced_LandUse');
 
 TrnSize = size(X, 2);
-ImgSize = 64; %28;
+ImgSize = 256; %28;
 ImgFormat = 'color'; %'color' or 'gray'
-
 
 % ===== Reshuffle the training data =====
 % Randnidx = randperm(size(mnist_train,1));
@@ -39,7 +38,7 @@ clear y_t;
 
 % ==== Subsampling the Training and Testing sets ============
 % (comment out the following four lines for a complete test)
-% every_nth_example = 40;
+% every_nth_example = 80;
 % TrnData = TrnData(1:every_nth_example:end,:);  % sample around 2500 training samples
 % TrnLabels = TrnLabels(1:every_nth_example:end); %
 % TestData = TestData(1:every_nth_example:end,:);  % sample around 1000 test samples
@@ -51,10 +50,10 @@ nTestImg = length(TestLabels);
 %% PCANet parameters (they should be funed based on validation set; i.e., ValData & ValLabel)
 % We use the parameters in our IEEE TPAMI submission
 PCANet.NumStages = 2;
-PCANet.PatchSize = [7 7];
-PCANet.NumFilters = [8 8];
-PCANet.HistBlockSize = [64 64];
-PCANet.BlkOverLapRatio = 0.0;
+PCANet.PatchSize =  [2  1];
+PCANet.NumFilters = [12 12];
+PCANet.HistBlockSize = [128 128];
+PCANet.BlkOverLapRatio = 0.25;
 PCANet.Pyramid = [];
 
 fprintf('\n ====== PCANet Parameters ======= \n')
@@ -64,6 +63,30 @@ PCANet
 fprintf('\n ====== PCANet Training ======= \n')
 TrnData_ImgCell = mat2imgcell(TrnData,ImgSize,ImgSize,ImgFormat); % convert columns in TrnData to cells
 clear TrnData;
+
+CATEGORIES = {
+  'agricultural';
+  'airplane';
+  'baseballdiamond';
+  'beach';
+  'buildings';
+  'chaparral';
+  'denseresidential';
+  'forest';
+  'freeway';
+  'golfcourse';
+  'harbor';
+  'intersection';
+  'mediumresidential';
+  'mobilehomepark';
+  'overpass';
+  'parkinglot';
+  'river';
+  'runway';
+  'sparseresidential';
+  'storagetanks';
+  'tenniscourt'
+};
 
 
 fprintf('Number of training samples: %d \n', length(TrnData_ImgCell))
@@ -93,6 +116,8 @@ fprintf('\n ====== PCANet Testing ======= \n')
 nCorrRecog = 0;
 RecHistory = zeros(nTestImg,1);
 
+predLabels = zeros(1, nTestImg);
+
 tic;
 for idx = 1:1:nTestImg
 
@@ -100,6 +125,8 @@ for idx = 1:1:nTestImg
 
     [xLabel_est, accuracy, decision_values] = predict(TestLabels(idx),...
         sparse(ftest'), models, '-q'); % label predictoin by libsvm
+
+    predLabels(idx) = xLabel_est;
 
     if xLabel_est == TestLabels(idx)
         RecHistory(idx) = 1;
@@ -111,9 +138,19 @@ for idx = 1:1:nTestImg
             [idx 100*nCorrRecog/idx toc/idx]);
     end
 
-    TestData_ImgCell{idx} = [];
+%     TestData_ImgCell{idx} = [];
 
 end
+
+rix = ceil(rand(90, 1) * length(TestData_ImgCell))';
+
+figure
+for i = rix
+    imshow(TestData_ImgCell{i}(:,:,1:3));
+    title(sprintf('[%s] %s', CATEGORIES{TestLabels(i)}, CATEGORIES{predLabels(i)}));
+    pause
+end
+
 Averaged_TimeperTest = toc/nTestImg;
 Accuracy = nCorrRecog/nTestImg;
 ErRate = 1 - Accuracy;
