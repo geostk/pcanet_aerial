@@ -38,11 +38,11 @@ clear y_t;
 
 % ==== Subsampling the Training and Testing sets ============
 % (comment out the following four lines for a complete test)
-% every_nth_example = 80;
-% TrnData = TrnData(1:every_nth_example:end,:);  % sample around 2500 training samples
-% TrnLabels = TrnLabels(1:every_nth_example:end); %
-% TestData = TestData(1:every_nth_example:end,:);  % sample around 1000 test samples
-% TestLabels = TestLabels(1:every_nth_example:end);
+every_nth_example = 80;
+TrnData = TrnData(1:every_nth_example:end,:);  % sample around 2500 training samples
+TrnLabels = TrnLabels(1:every_nth_example:end); %
+TestData = TestData(1:every_nth_example:end,:);  % sample around 1000 test samples
+TestLabels = TestLabels(1:every_nth_example:end);
 % ===========================================================
 
 nTestImg = length(TestLabels);
@@ -50,10 +50,10 @@ nTestImg = length(TestLabels);
 %% PCANet parameters (they should be funed based on validation set; i.e., ValData & ValLabel)
 % We use the parameters in our IEEE TPAMI submission
 PCANet.NumStages = 2;
-PCANet.PatchSize =  [2  1];
-PCANet.NumFilters = [12 12];
-PCANet.HistBlockSize = [128 128];
-PCANet.BlkOverLapRatio = 0.25;
+PCANet.PatchSize =  [7 7];
+PCANet.NumFilters = [32 20];
+PCANet.HistBlockSize = [256 256];
+PCANet.BlkOverLapRatio = 0.0;
 PCANet.Pyramid = [];
 
 fprintf('\n ====== PCANet Parameters ======= \n')
@@ -91,15 +91,16 @@ CATEGORIES = {
 
 fprintf('Number of training samples: %d \n', length(TrnData_ImgCell))
 tic;
-[ftrain V BlkIdx] = PCANet_train(TrnData_ImgCell,PCANet,1); % BlkIdx serves the purpose of learning block-wise DR projection matrix; e.g., WPCA
+[ftrain V] = PCANet_train(TrnData_ImgCell,PCANet,1);
 PCANet_TrnTime = toc;
 clear TrnData_ImgCell;
 
 fprintf('\n ====== Training Linear SVM Classifier ======= \n')
 tic;
-models = train(TrnLabels, ftrain', '-s 1 -q'); % we use linear SVM classifier (C = 1), calling libsvm library
+ftrain = ftrain';
+models = train(TrnLabels, ftrain, '-s 1 -q'); % we use linear SVM classifier (C = 1), calling libsvm library
 LinearSVM_TrnTime = toc;
-[predict_labels] = predict(TrnLabels, ftrain', models, '-q');
+[predict_labels] = predict(TrnLabels, ftrain, models, '-q');
 clear ftrain;
 
 trn_accuracy = sum(predict_labels == TrnLabels) / length(TrnLabels);
@@ -143,13 +144,13 @@ for idx = 1:1:nTestImg
 end
 
 rix = ceil(rand(90, 1) * length(TestData_ImgCell))';
-
-figure
-for i = rix
-    imshow(TestData_ImgCell{i}(:,:,1:3));
-    title(sprintf('[%s] %s', CATEGORIES{TestLabels(i)}, CATEGORIES{predLabels(i)}));
-    pause
-end
+% 
+% figure
+% for i = rix
+%     imshow(TestData_ImgCell{i}(:,:,1:3));
+%     title(sprintf('[%s] %s', CATEGORIES{TestLabels(i)}, CATEGORIES{predLabels(i)}));
+%     pause
+% end
 
 Averaged_TimeperTest = toc/nTestImg;
 Accuracy = nCorrRecog/nTestImg;
