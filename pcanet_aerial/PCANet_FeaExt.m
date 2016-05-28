@@ -1,4 +1,4 @@
-function [f BlkIdx] = PCANet_FeaExt(InImg,V,PCANet)
+function [f] = PCANet_FeaExt(InImg,V,PCANet)
 % =======INPUT=============
 % InImg     Input images (cell)  
 % V         given PCA filter banks (cell)
@@ -21,7 +21,6 @@ function [f BlkIdx] = PCANet_FeaExt(InImg,V,PCANet)
 %           is applied
 % =======OUTPUT============
 % f         PCANet features (each column corresponds to feature of each image)
-% BlkIdx    index of local block from which the histogram is compuated
 % =========================
 
 addpath('./Utils')
@@ -41,7 +40,7 @@ for stage = 1:PCANet.NumStages
            PCANet.PatchSize(stage), PCANet.NumFilters(stage), V{stage});  
 end
 
-[f BlkIdx] = HashingHist(PCANet,ImgIdx,OutImg);
+[f] = HashingHist(PCANet,ImgIdx,OutImg);
 %
 
 
