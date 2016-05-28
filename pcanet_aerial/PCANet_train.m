@@ -1,4 +1,4 @@
-function [f V BlkIdx] = PCANet_train(InImg,PCANet,IdtExt)
+function [f V] = PCANet_train(InImg,PCANet,IdtExt)
 % =======INPUT=============
 % InImg     Input images (cell); each cell can be either a matrix (Gray) or a 3D tensor (RGB)
 % PCANet    PCANet parameters (struct)
@@ -22,7 +22,6 @@ function [f V BlkIdx] = PCANet_train(InImg,PCANet,IdtExt)
 % =======OUTPUT============
 % f         PCANet features (each column corresponds to feature of each image)
 % V         learned PCA filter banks (cell)
-% BlkIdx    index of local block from which the histogram is compuated
 % =========================
 
 addpath('./Utils')
@@ -63,7 +62,7 @@ if IdtExt == 1 % enable feature extraction
         [OutImg_i ImgIdx_i] = PCA_output({OutImg{idx}}, ones(sum(OutImgIndex),1),...
             PCANet.PatchSize(end), PCANet.NumFilters(end), V{end});  % compute the last PCA outputs of image "idx"
 
-        [f{idx} BlkIdx] = HashingHist(PCANet,ImgIdx_i,OutImg_i); % compute the feature of image "idx"
+        [f{idx}] = HashingHist(PCANet,ImgIdx_i,OutImg_i); % compute the feature of image "idx"
 %        [f{idx} BlkIdx] = SphereSum(PCANet,ImgIdx_i,OutImg_i); % Testing!!
         OutImg{idx} = [];
 
@@ -73,5 +72,4 @@ if IdtExt == 1 % enable feature extraction
 
 else  % disable feature extraction
     f = [];
-    BlkIdx = [];
 end

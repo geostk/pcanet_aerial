@@ -1,4 +1,4 @@
-function [f BlkIdx] = HashingHist(PCANet,ImgIdx,OutImg)
+function [f] = HashingHist(PCANet,ImgIdx,OutImg)
 % Output layer of PCANet (Hashing plus local histogram)
 % ========= INPUT ============
 % PCANet  PCANet parameters (struct)
@@ -22,7 +22,6 @@ function [f BlkIdx] = HashingHist(PCANet,ImgIdx,OutImg)
 % OutImg  PCA filter output before the last stage (cell structure)
 % ========= OUTPUT ===========
 % f       PCANet features (each column corresponds to feature of each image)
-% BlkIdx  index of local block from which the histogram is compuated
 % ============================
 addpath('./Utils')
 
@@ -33,7 +32,6 @@ map_weights = 2.^((PCANet.NumFilters(end)-1):-1:0); % weights for binary to deci
 
 
 for Idx = 1:NumImg
-
     im = OutImg{Idx};
 
     hash = zeros(size(im, 1), size(im, 2));
@@ -61,8 +59,6 @@ for Idx = 1:NumImg
 end
 
 f = [f{:}];
-BlkIdx = ImgIdx;
-
 %-------------------------------
 function X = Heaviside(X) % binary quantization
 X = sign(X);
