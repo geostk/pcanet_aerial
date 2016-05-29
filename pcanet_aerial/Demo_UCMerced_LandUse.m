@@ -16,7 +16,7 @@ addpath('./Liblinear');
 load('../datasets/UCMerced_LandUse');
 
 TrnSize = size(X, 2);
-ImgSize = 64; %28;
+ImgSize = 256; %28;
 ImgFormat = 'color'; %'color' or 'gray'
 
 
@@ -39,11 +39,11 @@ clear y_t;
 
 % ==== Subsampling the Training and Testing sets ============
 % (comment out the following four lines for a complete test)
-every_nth_example = 80;
-TrnData = TrnData(1:every_nth_example:end,:);  % sample around 2500 training samples
-TrnLabels = TrnLabels(1:every_nth_example:end); %
-TestData = TestData(1:every_nth_example:end,:);  % sample around 1000 test samples
-TestLabels = TestLabels(1:every_nth_example:end);
+% every_nth_example = 80;
+% TrnData = TrnData(1:every_nth_example:end,:);  % sample around 2500 training samples
+% TrnLabels = TrnLabels(1:every_nth_example:end); %
+% TestData = TestData(1:every_nth_example:end,:);  % sample around 1000 test samples
+% TestLabels = TestLabels(1:every_nth_example:end);
 % ===========================================================
 
 nTestImg = length(TestLabels);
@@ -52,9 +52,9 @@ nTestImg = length(TestLabels);
 % We use the parameters in our IEEE TPAMI submission
 PCANet.NumStages = 2;
 PCANet.PatchSize = [7 7];
-PCANet.NumFilters = [32 20];
-PCANet.HistBlockSize = [64 64];
-PCANet.BlkOverLapRatio = 0.0;
+PCANet.NumFilters = [16 16];
+PCANet.HistBlockSize = [128 128];
+PCANet.BlkOverLapRatio = 0.25;
 PCANet.Pyramid = [];
 
 fprintf('\n ====== PCANet Parameters ======= \n')
