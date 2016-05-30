@@ -16,7 +16,7 @@ addpath('./Liblinear');
 load('../datasets/UCMerced_LandUse');
 
 TrnSize = size(X, 2);
-ImgSize = 64; %28;
+ImgSize = 256; %28;
 ImgFormat = 'color'; %'color' or 'gray'
 
 
@@ -52,6 +52,7 @@ nTestImg = length(TestLabels);
 % We use the parameters in our IEEE TPAMI submission
 PCANet.NumStages = 2;
 PCANet.PatchSize = [7 7];
+PCANet.PoolingSize = [2 2];
 PCANet.NumFilters = [32 20];
 PCANet.HistBlockSize = [64 64];
 PCANet.BlkOverLapRatio = 0.0;

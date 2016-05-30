@@ -1,4 +1,4 @@
-function [OutImg OutImgIdx] = PCA_output(InImg, InImgIdx, PatchSize, NumFilters, V)
+function [OutImg OutImgIdx] = PCA_output(InImg, InImgIdx, PatchSize, PoolingSize, NumFilters, V)
 % Computing PCA filter outputs
 % ======== INPUT ============
 % InImg         Input images (cell structure); each cell can be either a matrix (Gray) or a 3D tensor (RGB)
@@ -22,10 +22,10 @@ for i = 1:ImgZ
     [ImgX, ImgY, NumChls] = size(InImg{i});
     img = zeros(ImgX+PatchSize-1,ImgY+PatchSize-1, NumChls);
     img((mag + mod_pmt):end-mag,(mag + mod_pmt):end-mag,:) = InImg{i};
-    im = im2col_mean_removal(img,[PatchSize PatchSize]); % collect all the patches of the ith image in a matrix, and perform patch mean removal
+    im = im2col_mean_removal(img,[PatchSize PatchSize], [PoolingSize PoolingSize]); % collect all the patches of the ith image in a matrix, and perform patch mean removal
     for j = 1:NumFilters
         cnt = cnt + 1;
-        OutImg{cnt} = reshape(V(:,j)'*im,ImgX,ImgY);  % convolution output
+        OutImg{cnt} = reshape(V(:,j)'*im,ImgX/PoolingSize,ImgY/PoolingSize);  % convolution output
     end
     InImg{i} = [];
 end

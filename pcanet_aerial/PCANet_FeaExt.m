@@ -37,7 +37,7 @@ ImgIdx = (1:NumImg)';
 clear InImg;
 for stage = 1:PCANet.NumStages
      [OutImg ImgIdx] = PCA_output(OutImg, ImgIdx, ...
-           PCANet.PatchSize(stage), PCANet.NumFilters(stage), V{stage});  
+           PCANet.PatchSize(stage), PCANet.PoolingSize(stage), PCANet.NumFilters(stage), V{stage});  
 end
 
 [f] = HashingHist(PCANet,ImgIdx,OutImg);

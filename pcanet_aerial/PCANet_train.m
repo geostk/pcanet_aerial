@@ -46,7 +46,7 @@ for stage = 1:PCANet.NumStages
 
     if stage ~= PCANet.NumStages % compute the PCA outputs only when it is NOT the last stage
         [OutImg ImgIdx] = PCA_output(OutImg, ImgIdx, ...
-            PCANet.PatchSize(stage), PCANet.NumFilters(stage), V{stage});
+            PCANet.PatchSize(stage), PCANet.PoolingSize(stage), PCANet.NumFilters(stage), V{stage});
     end
 end
 
@@ -60,7 +60,7 @@ if IdtExt == 1 % enable feature extraction
         OutImgIndex = ImgIdx==idx; % select feature maps corresponding to image "idx" (outputs of the-last-but-one PCA filter bank)
 
         [OutImg_i ImgIdx_i] = PCA_output(OutImg(OutImgIndex), ones(sum(OutImgIndex),1),...
-            PCANet.PatchSize(end), PCANet.NumFilters(end), V{end});  % compute the last PCA outputs of image "idx"
+            PCANet.PatchSize(end), PCANet.PoolingSize(end), PCANet.NumFilters(end), V{end});  % compute the last PCA outputs of image "idx"
 
         [f{idx}] = HashingHist(PCANet,ImgIdx_i,OutImg_i); % compute the feature of image "idx"
 %        [f{idx} BlkIdx] = SphereSum(PCANet,ImgIdx_i,OutImg_i); % Testing!!
