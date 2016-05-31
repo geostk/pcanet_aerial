@@ -39,27 +39,25 @@ for Idx = 1:NumImg
         hash = hash + map_weights(i)*Heaviside(im(:,:,i));
     end
 
-    if isempty(PCANet.HistBlockSize)
-        NumBlk = ceil((PCANet.ImgBlkRatio - 1)./PCANet.BlkOverLapRatio) + 1;
-        HistBlockSize = ceil(size(hash)./PCANet.ImgBlkRatio);
-        OverLapinPixel = ceil((size(hash) - HistBlockSize)./(NumBlk - 1));
-        NImgSize = (NumBlk-1).*OverLapinPixel + HistBlockSize;
-        Tmp = zeros(NImgSize);
-        Tmp(1:size(hash,1), 1:size(hash,2)) = hash;
-        f{Idx} = vec(sparse(histc(im2col_general(Tmp,HistBlockSize,...
-            OverLapinPixel),(0:2^PCANet.NumFilters(end)-1)')));
-    else
-
-        stride = round((1-PCANet.BlkOverLapRatio)*PCANet.HistBlockSize);
-        blkwise_fea = sparse(histc(im2col_general(hash,PCANet.HistBlockSize,...
-          stride),(0:2^PCANet.NumFilters(end)-1)'));
-        f{Idx} = vec(blkwise_fea);
-    end
-    OutImg{Idx} = [];
+    stride = round((1-PCANet.BlkOverLapRatio)*PCANet.HistBlockSize);
+    f{Idx} = sparse_hist(im2col_general(hash,PCANet.HistBlockSize,...
+      stride), 2^PCANet.NumFilters(end));
 end
 
 f = [f{:}];
 %-------------------------------
+function h = sparse_hist( input, hvalues )
+
+if size(input, 2) == 1
+    h = sparse(input + 1, 1, 1, hvalues, 1, length(input));
+else
+    ca = cell(size(input, 2), 1);
+    for idx = 1:size(input, 2)
+        ca{idx} = sparse( input(:, idx) + 1, 1, 1, hvalues, 1, size(input,1));
+    end
+    h = sparse(vertcat(ca{:}));
+end
+
 function X = Heaviside(X) % binary quantization
 X = sign(X);
 X(X<=0) = 0;
