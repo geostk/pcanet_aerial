@@ -28,6 +28,5 @@ for i = 1:ImgZ
         cnt = cnt + 1;
         [OutImg{cnt} ~] = MaxPooling(reshape(V(:,j)'*im,ImgX,ImgY), [PoolingPatchSize PoolingPatchSize]);  % convolution output + pooling
     end
-    InImg{i} = [];
 end
 OutImgIdx = kron(InImgIdx,ones(NumFilters,1));
