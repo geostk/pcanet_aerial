@@ -27,6 +27,6 @@ for i = 1:ImgZ
         cnt = cnt + 1;
         OutImg{cnt} = reshape(V(:,j)'*im,ImgX/PoolingSize,ImgY/PoolingSize);  % convolution output
     end
-    InImg{i} = [];
+
 end
 OutImgIdx = kron(InImgIdx,ones(NumFilters,1));
