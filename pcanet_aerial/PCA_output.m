@@ -28,6 +28,6 @@ for i = 1:ImgZ
     for j = 1:NumFilters
         OutImg{i}(:,:,j) = reshape(V(:,j)'*im,ImgX,ImgY);  % convolution output
     end
-    InImg{i} = [];
+
 end
 OutImgIdx = kron(InImgIdx,ones(NumFilters,1));
