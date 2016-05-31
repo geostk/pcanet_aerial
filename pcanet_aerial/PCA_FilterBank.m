@@ -21,7 +21,7 @@ RandIdx = RandIdx(1:NumRSamples);
 NumChls = size(InImg{1},3);
 % Rx = zeros(NumChls*PatchSize^2,NumChls*PatchSize^2);
 
-V = rand(NumChls*PatchSize*PatchSize, NumFilters);
+V = rand(NumChls*PatchSize*PatchSize, NumFilters)*2 - 1;
 
 % 
 % for i = RandIdx %1:ImgZ
