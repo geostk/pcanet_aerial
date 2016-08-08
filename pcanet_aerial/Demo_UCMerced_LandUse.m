@@ -10,6 +10,8 @@
 clear all; close all; clc;
 addpath('./Utils');
 addpath('./Liblinear');
+addpath('./piotrstoolbox/classify');
+
 
 %% Loading data from MNIST Basic (10000 training, 2000 validation, 50000 testing)
 % load mnist_basic data
@@ -38,22 +40,23 @@ clear y_t;
 
 % ==== Subsampling the Training and Testing sets ============
 % (comment out the following four lines for a complete test)
-every_nth_example = 80;
-TrnData = TrnData(1:every_nth_example:end,:);  % sample around 2500 training samples
-TrnLabels = TrnLabels(1:every_nth_example:end); %
-TestData = TestData(1:every_nth_example:end,:);  % sample around 1000 test samples
-TestLabels = TestLabels(1:every_nth_example:end);
+% every_nth_example = 80;
+% TrnData = TrnData(1:every_nth_example:end,:);  % sample around 2500 training samples
+% TrnLabels = TrnLabels(1:every_nth_example:end); %
+% TestData = TestData(1:every_nth_example:end,:);  % sample around 1000 test samples
+% TestLabels = TestLabels(1:every_nth_example:end);
 % ===========================================================
 
 nTestImg = length(TestLabels);
+numClasses = 21;
 
 %% PCANet parameters (they should be funed based on validation set; i.e., ValData & ValLabel)
 % We use the parameters in our IEEE TPAMI submission
 PCANet.NumStages = 2;
 PCANet.PatchSize =  [7 7];
-PCANet.NumFilters = [32 20];
-PCANet.HistBlockSize = [256 256];
-PCANet.BlkOverLapRatio = 0.0;
+PCANet.NumFilters = [16 16];
+PCANet.HistBlockSize = [128 128];
+PCANet.BlkOverLapRatio = 0.25;
 PCANet.Pyramid = [];
 
 fprintf('\n ====== PCANet Parameters ======= \n')
@@ -118,6 +121,14 @@ nCorrRecog = 0;
 RecHistory = zeros(nTestImg,1);
 
 predLabels = zeros(1, nTestImg);
+confusionMatrix = zeros(numClasses, numClasses);
+% cmTargets = zeros(numClasses, nTesImg);
+%
+% for i = 1:nTesImg
+%     cmTargets(TestLabels(i), i) = 1
+% end
+
+% cmOutputs= zeros(numClasses, nTesImg);
 
 tic;
 for idx = 1:1:nTestImg
@@ -133,6 +144,8 @@ for idx = 1:1:nTestImg
         RecHistory(idx) = 1;
         nCorrRecog = nCorrRecog + 1;
     end
+    confusionMatrix(TestLabels(idx), xLabel_est) = confusionMatrix(TestLabels(idx), xLabel_est) + 1;
+    % cmOutputs(TestLabels(idx), idx) = 1;
 
     if 0==mod(idx,nTestImg/100);
         fprintf('Accuracy up to %d tests is %.2f%%; taking %.2f secs per testing sample on average. \n',...
@@ -144,7 +157,7 @@ for idx = 1:1:nTestImg
 end
 
 rix = ceil(rand(90, 1) * length(TestData_ImgCell))';
-% 
+%
 % figure
 % for i = rix
 %     imshow(TestData_ImgCell{i}(:,:,1:3));
@@ -162,3 +175,8 @@ fprintf('\n     PCANet training time: %.2f secs.', PCANet_TrnTime);
 fprintf('\n     Linear SVM training time: %.2f secs.', LinearSVM_TrnTime);
 fprintf('\n     Testing error rate: %.2f%%', 100*ErRate);
 fprintf('\n     Average testing time %.2f secs per test sample. \n\n',Averaged_TimeperTest);
+fprintf('\n     Confusion Matrix (each row represents single actuall class, and each element in row respresents number of predictions for that class) \n\n');
+confusionMatrix;
+%plotconfusion(cmTargets, cmOutputs, 'Test results')
+CM = confMatrix(TestLabels, predLabels, numClasses);
+confMatrixShow(CM, CATEGORIES, {'FontSize', 16});
