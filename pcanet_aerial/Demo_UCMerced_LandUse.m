@@ -10,6 +10,32 @@
 clear all; close all; clc;
 addpath('./Utils');
 addpath('./Liblinear');
+addpath('./piotrstoolbox/classify');
+
+CATEGORIES = {
+  'agricultural';
+  'airplane';
+  'baseballdiamond';
+  'beach';
+  'buildings';
+  'chaparral';
+  'denseresidential';
+  'forest';
+  'freeway';
+  'golfcourse';
+  'harbor';
+  'intersection';
+  'mediumresidential';
+  'mobilehomepark';
+  'overpass';
+  'parkinglot';
+  'river';
+  'runway';
+  'sparseresidential';
+  'storagetanks';
+  'tenniscourt'
+};
+
 
 load('../datasets/UCMerced_LandUse');
 
@@ -39,14 +65,15 @@ StandardMappingMatrices = loadStandardMappingMatrices();
 % ===========================================================
 
 nTestImg = length(TestLabels);
+numClasses = 21;
 
 %% PCANet parameters (they should be funed based on validation set; i.e., ValData & ValLabel)
 % We use the parameters in our IEEE TPAMI submission
 PCANet.NumStages = 2;
 PCANet.PatchSize = [7 7];
-PCANet.PatchingStep = [3 3];
+PCANet.PatchingStep = [1 1];
 PCANet.PoolingPatchSize = [2 2];
-PCANet.NumFilters = [32 16];
+PCANet.NumFilters = [32 20];
 PCANet.HistBlockSize = [64 64];
 PCANet.BlkOverLapRatio = 0.0;
 PCANet.Pyramid = [];
@@ -90,6 +117,18 @@ fprintf('\n ====== PCANet Testing ======= \n')
 nCorrRecog = 0;
 RecHistory = zeros(nTestImg,1);
 
+predLabels = zeros(1, nTestImg);
+confusionMatrix = zeros(numClasses, numClasses);
+% cmTargets = zeros(numClasses, nTesImg);
+%
+% for i = 1:nTesImg^M
+%     cmTargets(TestLabels(i), i) = 1
+% end^M
+
+% cmOutputs= zeros(numClasses, nTesImg);
+
+
+
 tic;
 for idx = 1:1:nTestImg
 
@@ -98,10 +137,15 @@ for idx = 1:1:nTestImg
     [xLabel_est, accuracy, decision_values] = predict(TestLabels(idx),...
         sparse(ftest'), models, '-q'); % label predictoin by libsvm
 
+    predLabels(idx) = xLabel_est;
+
     if xLabel_est == TestLabels(idx)
         RecHistory(idx) = 1;
         nCorrRecog = nCorrRecog + 1;
     end
+
+    confusionMatrix(TestLabels(idx), xLabel_est) = confusionMatrix(TestLabels(idx), xLabel_est) + 1;
+    % cmOutputs(TestLabels(idx), idx) = 1;
 
     if 0==mod(idx,nTestImg/100);
         fprintf('Accuracy up to %d tests is %.2f%%; taking %.2f secs per testing sample on average. \n',...
@@ -121,3 +165,8 @@ fprintf('\n     PCANet training time: %.2f secs.', PCANet_TrnTime);
 fprintf('\n     Linear SVM training time: %.2f secs.', LinearSVM_TrnTime);
 fprintf('\n     Testing error rate: %.2f%%', 100*ErRate);
 fprintf('\n     Average testing time %.2f secs per test sample. \n\n',Averaged_TimeperTest);
+fprintf('\n     Confusion Matrix (each row represents single actuall class, and each element in row respresents number of predictions for that class) \n\n');
+confusionMatrix;
+%plotconfusion(cmTargets, cmOutputs, 'Test results')
+CM = confMatrix(TestLabels, predLabels, numClasses);
+confMatrixShow(CM, CATEGORIES, {'FontSize', 16});
